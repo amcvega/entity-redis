@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, GADTs #-}
 module Entity.Redis.Interface where
 
 import Control.Monad (liftM)
@@ -24,6 +24,17 @@ import Data.Typeable
 import Data.List (intercalate)
 
 
+evalCommonRedis :: Connection -> CommonI a -> IO (Either String a)
+evalCommonRedis db fn = case fn of
+    FindRecord x -> findRecord db x
+    FindRecordsByIndex attr val -> findRecordsByIndex db attr val
+    CreateRecord plan -> createRecord db plan
+    UpdateRecord old new -> updateRecord db old new
+    DeleteRecord e -> deleteRecord db e
+    FindRecordsByIndices filters -> findRecordsMulti db filters
+    FindInterUnion inters unions -> findRecordsInterUnion db inters unions
+    FilterQuery q -> filterQuery db q
+    FindRecordByUnique attr val -> findRecordByUnique db attr val
 
 
 -- | Refactored IO Methods
